@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Personal Wiki Stack - Docker Image CI
 
 on:
   push:
@@ -14,5 +14,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Build the Docker image of your personal wiki 
+      run: docker build . --file docker-compose-init --tag personal-wiki-start:$(date +%s)
