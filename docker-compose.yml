@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # MariaDB service
+  database:
+    image: mariadb:10.11
+    restart: always
+    networks:
+      - pw_net
+    ports:
+      - "3306:3306"
+    volumes:
+      - db:/var/lib/mysql 
+      - ./_initdb:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_DATABASE: personnal_wiki
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: PSWD
+
+  # MediaWiki service
+  mediawiki:
+    build:
+      context: .
+      dockerfile: ./docker/MediaWiki.Dockerfile # Dockerfile for the MediaWiki service
+    restart: always
+    networks:
+      - pw_net
+    ports:
+      - "8080:80"
+    volumes:
+      - ext:/var/html/extensions
+      - /var/www/html/
+      - ./LocalSettings.php:/var/www/html/LocalSettings.php:ro
+      - ./composer.local.json:/var/www/html/composer.local.json:ro
+      - ./images/:/var/www/html/images/
+      - ./resources/assets/logo.png:/var/www/html/resources/assets/logo.png
+      - ./resources/assets/favicon.ico:/var/www/html/favicon.ico
+      - ./extensions:/var/www/html/extensions
+    depends_on:
+      - database
+
+  # Nextcloud service
+  nextcloud:
+    image: nextcloud:28.0.1
+    restart: always
+    networks:
+      - pw_net
+    ports:
+      - "8000:80"
+    volumes:
+      - nextcloud:/var/www/html
+      - ./nextcloud-data:/var/www/html/data/admin/files
+    depends_on:
+      - database
+
+  # Pentaho Data Integration service
+  pdi:
+    build:
+      context: .
+      dockerfile: ./docker/PentahoDataIntegration.Dockerfile # Dockerfile for the Pentaho Data Integration service
+    networks:
+      - pw_net
+    volumes:
+      - ./pdi_libs/:/pdi/data-integration/lib
+    environment:
+      - COMPOSE_CONVERT_WINDOWS_PATHS=1
+      - DISPLAY=host.docker.internal:0.0
+    depends_on:
+      - database
+
+  # phpMyAdmin service
+  phpmyadmin:
+    image: phpmyadmin:5.2.1
+    restart: always
+    networks:
+      - pw_net
+    ports:
+      - "8082:80"
+    environment:
+      - PMA_HOST=database
+      - PMA_PORT=3306
+      - PMA_ARBITRARY=1
+      - PMA_ABSOLUTE_URI=https://domainname.com/pma/
+
+    depends_on:
+      - database
+
+  # vsftpd service
+  ftp_server:
+    image: fauria/vsftpd
+    restart: always
+    ports:
+      - "20:20"
+      - "21:21"
+      - "21100-21110:21100-21110"
+    networks:
+      - pw_net
+    volumes:
+      - ./PentahoDataIntegration:/home/vsftpd
+    environment:
+      - FTP_USER=admin
+      - FTP_PASS=PSWD
+    depends_on:
+      - database
+
+  # Nginx service for reverse proxy and SSL 
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./conf.d:/etc/nginx/conf.d # Nginx configuration files
+      - ./certs:/etc/certs
+    networks:
+      - pw_net
+    depends_on:
+      - mediawiki
+      - nextcloud
+      - phpmyadmin
+
+# Docker volumes for persistent data
+# Nextcloud volume for persistent data storage of the Nextcloud container
+# MariaDB volume for persistent data storage (MediaWiki database)
+volumes:
+  db:
+  nextcloud:
+  ext:
+
+    # Define the custom network
+networks:
+  pw_net:
+    driver: bridge

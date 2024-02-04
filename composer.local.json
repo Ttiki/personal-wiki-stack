@@ -1,0 +1,11 @@
+{
+    "require": {
+        "mediawiki/semantic-media-wiki": "~4.1.2",
+        "mediawiki/maps": "~10.1.1",
+        "mediawiki/semantic-result-formats": "~4.2.0",
+        "mediawiki/semantic-forms-select": "~4.0.0-beta",
+        "professional-wiki/modern-timeline": "~1.2.2",
+        "professional-wiki/network": "~2.0.1",
+        "mediawiki/semantic-compound-queries": "~2.2.0"
+    }
+}
