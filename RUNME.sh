@@ -17,7 +17,7 @@
 
 # Functions
 install() {
-    echo "Installing Personal Wiki"
+    echo "Installing pedia"
     echo "=-=-=-=-=-=-=-=-=-=-="
 
     sh ./scripts/install.sh
@@ -27,7 +27,7 @@ install() {
 }
 
 update() {
-    echo "Updating  Personal Wiki"
+    echo "Updating pedia"
     echo "=-=-=-=-=-=-=-=-=-=-="
     
     sh ./scripts/update.sh
@@ -65,10 +65,12 @@ exit_script() {
 while true; do
     read -p "Press any key to continue..."
     
-    echo "Welcome to the  Personal Wiki maintenance script"
+
+   
+    echo "Welcome to the pedia maintenance script"
     echo "What do you want to do?"
-    echo "1. Install  Personal Wiki"
-    echo "2. Update  Personal Wiki"
+    echo "1. Install/reinstall pedia"
+    echo "2. Update pedia"
     echo "3. Backup the database"
     echo "4. Delete old backups"
     echo "0 Quit the script"

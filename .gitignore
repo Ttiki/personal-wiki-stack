@@ -3,3 +3,5 @@
 /extensions
 /database_backups
 /images
+.env
+*.code-workspace
